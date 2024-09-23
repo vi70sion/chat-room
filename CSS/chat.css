@@ -1,0 +1,144 @@
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+}
+
+.chat-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+}
+
+.users-panel {
+    width: 20%;
+    background-color: #f8f9fa;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.users-panel h3 {
+    margin: 0 0 10px;
+}
+
+#users-list {
+    list-style: none;
+    padding: 0;
+}
+
+#users-list li {
+    background-color: #e9ecef;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.chat-panel {
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#messages {
+    flex-grow: 1;
+    overflow-y: auto;
+    margin-bottom: 20px;
+}
+
+.message {
+    margin-bottom: 15px;
+    font-size: 14px;
+    padding: 10px;
+    border-radius: 5px;
+    max-width: 70%;
+    word-wrap: break-word;
+}
+
+/* žinutė iš users */
+.message.left {
+    background-color: #f1f1f1;
+    text-align: left;
+}
+
+/* žinutė iš current user */
+.message.right {
+    background-color: #3b82f6;
+    color: white;
+    text-align: right;
+    margin-left: auto;
+}
+
+.message-input {
+    display: flex;
+    align-items: center;
+}
+
+.message-input input {
+    width: 100%;
+    padding: 10px;
+    margin-right: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.message-input button {
+    padding: 10px 20px;
+    background-color: #3b82f6;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.message-input button:hover {
+    background-color: #2563eb;
+}
+
+.leave-btn {
+    padding: 5px 10px; 
+    font-size: 0.9em;  
+    background-color: #f44336; 
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    position: absolute; 
+    right: 20px; 
+    top: 5px; 
+}
+
+.leave-btn:hover {
+    background-color: #d32f2f; 
+}
+
+.chat-container {
+    position: relative; 
+}
+
+.message {
+    margin-bottom: 15px; 
+}
+
+.message-content {
+    padding: 10px;
+    background-color: #f1f1f1;
+    border-radius: 5px;
+    display: inline-block;
+    max-width: 70%; 
+}
+
+.right .message-content {
+    background-color: #ffffff; /* Dabartinio vartotojo žinutės spalva */
+    color: #110404;
+}
+
+.time {
+    font-size: 0.8em;
+    color: #110404;
+    margin-top: 5px;
+    text-align: right; 
+}

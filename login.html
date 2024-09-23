@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyRoom Login</title>
+    <link rel="stylesheet" href="./CSS/login.css">
+    <style>
+        
+    </style>
+</head>
+<body>
+    <div class="login-box">
+        <h2>MyRoom Login</h2>
+        <input type="text" id="name" placeholder="Your Name" />
+        <button id="connect" onclick="submitLogin()">Submit</button>
+    </div>
+
+    <script>
+        function submitLogin() {
+            var name = document.getElementById("name").value;
+            if (name.trim() !== '') {
+                localStorage.setItem("username", name); // saugoti vardą į localStorage
+                window.location.href = "chat.html";     // pereiti į chat
+            } else {
+                alert("Please enter your name.");
+            }
+        }
+    </script>
+</body>
+</html>

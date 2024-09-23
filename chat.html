@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyRoom Chat</title>
+    <link rel="stylesheet" href="./CSS/chat.css">
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="users-panel">
+            <h3>MyRoom Users</h3>
+            <ul id="users-list"></ul>
+        </div>
+
+        <div class="chat-panel">
+            <div id="messages"></div>
+            <div class="message-input">
+                <input type="text" id="message-content" placeholder="Type a message..." />
+                <button id="send-btn">Send</button>
+            </div>
+            <button id="leave-btn" class="leave-btn">Leave Chat</button>
+        </div>
+    </div>
+
+    <script>
+        let stompClient = null;
+
+        function connect() {
+            var socket = new SockJS('http://localhost:8080/websocket');
+            stompClient = Stomp.over(socket);
+            stompClient.connect({}, function (frame) {
+                let username = localStorage.getItem("username");
+
+                // užsisakyti žinutes
+                stompClient.subscribe('/topic/messages', function (messageOutput) {
+                    showMessage(JSON.parse(messageOutput.body));
+                });
+
+                // užsisakyti users topic ir pridėti dabartinį user
+                stompClient.subscribe('/topic/users', function (userList) {
+                    updateUserList(JSON.parse(userList.body));
+                });
+
+                // prisijungiant pridėti user į sąrašą
+                stompClient.send("/app/user", {}, JSON.stringify(username));
+            });
+        }
+
+        function sendMessage() {
+            const messageContent = document.getElementById('message-content').value;
+            if (messageContent.trim() !== '') {
+                const message = {
+                    sender: localStorage.getItem('username'),
+                    content: messageContent,
+                };
+                stompClient.send("/app/chat", {}, JSON.stringify(message));
+                document.getElementById('message-content').value = '';
+            }
+        }
+
+        function showMessage(message) {
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message';
+
+            // tikrinti ar tai sistemos pranešimas
+            if (message.sender === "SYSTEM") {
+                messageElement.classList.add('system-message');  
+                messageElement.innerHTML = `
+                    <em>${message.content}</em>
+                    <div class="time">${formatDateTime(message.sentAt)}</div>
+                `;
+            } else {
+                if (message.sender === localStorage.getItem('username')) {
+                    messageElement.classList.add('right');  // dabartinis user - dešinys lygiavimas
+                } else {
+                    messageElement.classList.add('left');   // kiti users - kairys lygiavimas
+                }
+                messageElement.innerHTML = `
+                    <div class="message-content">
+                        <strong>${message.sender}</strong>: ${message.content}
+                    </div>
+                    <div class="time">${formatDateTime(message.sentAt)}</div>
+                `;
+            }
+
+            document.getElementById('messages').appendChild(messageElement);
+
+            // Scroll žemyn po naujos žinutės pridėjimo
+            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+        }
+
+
+        function formatDateTime(dateTime) {
+            const date = new Date(dateTime);
+            const formattedDateTime = date.toLocaleString('lt-LT', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: undefined, // pašaliname sekundes
+                hour12: false // naudojame 24 valandų laiką
+            });
+            return formattedDateTime; 
+        }
+
+
+        function updateUserList(users) {
+            const userList = document.getElementById('users-list');
+            userList.innerHTML = '';
+            users.forEach(user => {
+                const userElement = document.createElement('li');
+                userElement.textContent = user.replace(/"/g, '');
+                userList.appendChild(userElement);
+            });
+        }
+
+        // siųsti žinutę, kad user atsijungia nuo chat
+        function leaveChat() {
+            const username = localStorage.getItem('username');
+            stompClient.send("/app/leave", {}, JSON.stringify(username));
+
+            // trinti user vardą iš localStorage 
+            localStorage.removeItem('username');
+            window.location.href = 'login.html';
+        }        
+
+        document.getElementById('send-btn').addEventListener('click', sendMessage);
+        document.getElementById('leave-btn').addEventListener('click', leaveChat);  
+        connect();
+    </script>
+</body>
+</html>
