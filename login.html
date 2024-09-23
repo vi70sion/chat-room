@@ -13,19 +13,57 @@
     <div class="login-box">
         <h2>MyRoom Login</h2>
         <input type="text" id="name" placeholder="Your Name" />
+        <input type="text" id="password" placeholder="Your Password" />
         <button id="connect" onclick="submitLogin()">Submit</button>
     </div>
 
     <script>
-        function submitLogin() {
+
+async function submitLogin() {
             var name = document.getElementById("name").value;
-            if (name.trim() !== '') {
-                localStorage.setItem("username", name); // saugoti vardą į localStorage
-                window.location.href = "chat.html";     // pereiti į chat
-            } else {
+            var password = document.getElementById("password").value;
+
+            if (name.trim() === '') {
                 alert("Please enter your name.");
+                return;
+            }
+            if (password.trim() === '') {
+                alert("Please enter your password.");
+                return;
+            }
+
+            const loginData = {
+                name: name,
+                password: password
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/chatroom/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(loginData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    const token = data.token;
+
+                    // Store the token in a cookie
+                    document.cookie = `LoginCookies=${token}; path=/; max-age=${7 * 60 * 60 * 24}`; // 7 days
+                    localStorage.setItem("username", name); 
+                    window.location.href = "chat.html"; // Redirect to chat
+                } else {
+                    alert("Login failed. Please check your username and password.");
+                }
+            } catch (error) {
+                console.error('Error during login:', error);
+                alert("There was an error connecting to the server.");
             }
         }
+
+
     </script>
 </body>
 </html>
