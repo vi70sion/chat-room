@@ -53,7 +53,7 @@ async function submitLogin() {
                     // Store the token in a cookie
                     document.cookie = `LoginCookies=${token}; path=/; max-age=${7 * 60 * 60 * 24}`; // 7 days
                     localStorage.setItem("username", name); 
-                    window.location.href = "chat.html"; // Redirect to chat
+                    window.location.href = "chat.html"; // Redirect to chat page
                 } else {
                     alert("Login failed. Please check your username and password.");
                 }
