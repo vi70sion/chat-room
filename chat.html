@@ -28,35 +28,71 @@
     <script>
         let stompClient = null;
 
-        function connect() {
-            var socket = new SockJS('http://localhost:8080/websocket');
-            stompClient = Stomp.over(socket);
-            stompClient.connect({}, function (frame) {
-                let username = localStorage.getItem("username");
+//        function connect() {
+//            var socket = new SockJS('http://localhost:8080/websocket');
+//            stompClient = Stomp.over(socket);
+//            stompClient.connect({}, function (frame) {
+//                let username = localStorage.getItem("username");
 
                 // užsisakyti žinutes
+//                stompClient.subscribe('/topic/messages', function (messageOutput) {
+//                    showMessage(JSON.parse(messageOutput.body));
+//                });
+
+                // užsisakyti users topic ir pridėti dabartinį user
+//                stompClient.subscribe('/topic/users', function (userList) {
+//                    updateUserList(JSON.parse(userList.body));
+//                });
+
+                // prisijungiant pridėti user į sąrašą
+//                stompClient.send("/app/user", {}, JSON.stringify(username));
+//            });
+//        }
+
+
+        function connect() {
+            let token = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('LoginCookies='))
+                ?.split('=')[1];
+
+            var socket = new SockJS('http://localhost:8080/websocket');
+            stompClient = Stomp.over(socket);
+
+            stompClient.connect({ Authorization: `Bearer ${token}` }, function (frame) {
+                let username = localStorage.getItem("username");
+
+                // Subscribe to messages topic
                 stompClient.subscribe('/topic/messages', function (messageOutput) {
                     showMessage(JSON.parse(messageOutput.body));
                 });
 
-                // užsisakyti users topic ir pridėti dabartinį user
+                // Subscribe to users topic
                 stompClient.subscribe('/topic/users', function (userList) {
                     updateUserList(JSON.parse(userList.body));
                 });
 
-                // prisijungiant pridėti user į sąrašą
+                // Send a message to add the user to the chat room
                 stompClient.send("/app/user", {}, JSON.stringify(username));
+            }, function(error) {
+                console.error('Error connecting: ', error);
+                alert("Could not connect to WebSocket. Please try again.");
             });
         }
+
 
         function sendMessage() {
             const messageContent = document.getElementById('message-content').value;
             if (messageContent.trim() !== '') {
+                let token = document.cookie
+                    .split('; ')
+                    .find(row => row.startsWith('LoginCookies='))
+                    ?.split('=')[1];
                 const message = {
                     sender: localStorage.getItem('username'),
                     content: messageContent,
                 };
-                stompClient.send("/app/chat", {}, JSON.stringify(message));
+                stompClient.send("/app/chat", {Authorization: `Bearer ${token}`}, JSON.stringify(message));
                 document.getElementById('message-content').value = '';
             }
         }
